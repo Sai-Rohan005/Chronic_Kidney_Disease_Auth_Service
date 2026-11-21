@@ -87,7 +87,6 @@ public class Authentication {
     }
 
     public AuthResult getRoleByToken(String authorizationHeader) {
-
         String token = JwtTokenService.bearerToken(authorizationHeader);
 
         if (token == null) {

@@ -31,9 +31,13 @@ public class AuthController {
     }
     @GetMapping("/getRoleByToken")
     public ResponseEntity<Map<String, Object>> getRoleByToken(
-            @RequestHeader("Authorization") String Token
-    ){
-        return response(authentication.getRoleByToken(Token));
+            @RequestHeader("Authorization") String token
+    ) {
+
+        AuthResult result = authentication.getRoleByToken(token);
+
+
+        return response(result);
     }
     @PostMapping ("/getUser")
     public ResponseEntity<Map<String, Object>> getUser(
@@ -46,7 +50,13 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> getUserByToken(
             @RequestHeader("Authorization") String token
     ) {
-        return response(authentication.getUserByToken(token));
+        System.out.println(">>> AuthController.getUserByToken HIT");
+
+        UserResult result = authentication.getUserByToken(token);
+
+        System.out.println(">>> getUserByToken status = " + result.status());
+
+        return response(result);
     }
 
     @GetMapping("/getAllDoctors")

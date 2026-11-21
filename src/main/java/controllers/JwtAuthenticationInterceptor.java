@@ -3,10 +3,11 @@ package controllers;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerInterceptor;
 import services.JwtTokenService;
 
-import java.io.IOException;
 import java.util.Optional;
 
 @Component
@@ -26,17 +27,17 @@ public class JwtAuthenticationInterceptor implements HandlerInterceptor {
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler
-    ) throws IOException {
+    ) {
         String token = JwtTokenService.bearerToken(
                 request.getHeader("Authorization"));
         if (token == null) {
-            return unauthorized(response);
+            return unauthorized();
         }
 
         Optional<JwtTokenService.AuthenticatedUser> authenticatedUser =
                 jwtTokenService.authenticate(token);
         if (authenticatedUser.isEmpty()) {
-            return unauthorized(response);
+            return unauthorized();
         }
 
         JwtTokenService.AuthenticatedUser user = authenticatedUser.get();
@@ -45,11 +46,8 @@ public class JwtAuthenticationInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    private static boolean unauthorized(HttpServletResponse response) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.getWriter().write(
-                "{\"message\":\"Authentication required or token expired\"}");
-        return false;
+    private static boolean unauthorized() {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                "Authentication required or token expired");
     }
 }
