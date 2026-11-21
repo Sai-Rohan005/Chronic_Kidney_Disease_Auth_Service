@@ -1,6 +1,7 @@
 package services;
 
 import Database.UserRepository;
+import com.ckd.auth.JwtTokenService;
 import com.mongodb.MongoWriteException;
 import org.bson.Document;
 import org.mindrot.jbcrypt.BCrypt;
@@ -70,6 +71,9 @@ public class Authentication {
             return failure(400, "Name, a valid email, and password are required");
         }
 
+        if (!validPassword(password)) {
+            return failure(400, "Password must contain at least 12 characters and at most 72 UTF-8 bytes");
+        }
         if (userRepository.findUser(email) != null) {
             return failure(409, "An account with this email already exists");
         }
@@ -90,14 +94,14 @@ public class Authentication {
         String token = JwtTokenService.bearerToken(authorizationHeader);
 
         if (token == null) {
-            return failure(404,"Token Expired");
+            return failure(401,"Token Expired");
         }
 
         Optional<JwtTokenService.AuthenticatedUser> user =
                 jwtTokenService.authenticate(token);
 
         if (user.isEmpty()) {
-            return failure(404,"Invalid or expired token");
+            return failure(401,"Invalid or expired token");
         }
 
         String role = user.get().role();
@@ -113,14 +117,14 @@ public class Authentication {
         String token = JwtTokenService.bearerToken(authorizationHeader);
 
         if (token == null) {
-            return UserService.failure(404,"Token Expired");
+            return UserService.failure(401,"Token Expired");
         }
 
         Optional<JwtTokenService.AuthenticatedUser> user =
                 jwtTokenService.authenticate(token);
 
         if (user.isEmpty()) {
-            return UserService.failure(404,"Invalid or expired token");
+            return UserService.failure(401,"Invalid or expired token");
         }
 
         String email = user.get().email();
@@ -147,6 +151,9 @@ public class Authentication {
                     "A valid email, currentPassword, and newPassword are required");
         }
 
+        if (!validPassword(newPassword)) {
+            return failure(400, "Password must contain at least 12 characters and at most 72 UTF-8 bytes");
+        }
         Document user = userRepository.findUser(email);
         if (user == null || !passwordMatches(currentPassword, user.getString("passwordHash"))) {
             return failure(401, "Invalid email or current password");
@@ -167,14 +174,14 @@ public class Authentication {
         String token = JwtTokenService.bearerToken(authorizationHeader);
 
         if (token == null) {
-            return failure(404,"Token Expired");
+            return failure(401,"Token Expired");
         }
 
         Optional<JwtTokenService.AuthenticatedUser> user =
                 jwtTokenService.authenticate(token);
 
         if (user.isEmpty()) {
-            return failure(404,"Invalid or expired token");
+            return failure(401,"Invalid or expired token");
         }
 
         String role = user.get().role();
@@ -192,6 +199,11 @@ public class Authentication {
             return failure(401, "Invalid or expired token");
         }
         return new AuthResult(200, Map.of("message", "Logout successful"));
+    }
+
+    private static boolean validPassword(String password) {
+        return password != null && password.codePointCount(0, password.length()) >= 12
+                && password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= 72;
     }
 
     private static boolean passwordMatches(String password, String passwordHash) {

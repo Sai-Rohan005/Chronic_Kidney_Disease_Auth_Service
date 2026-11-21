@@ -1,4 +1,9 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
   application:
     name: CKD_AUTHSERVICE
 server:
@@ -10,11 +15,6 @@ mongodb:
   uri: ${MONGODB_URI:mongodb://localhost:27017/}
   database: ${MONGODB_DATABASE:CKD_JAVA}
 
-data:
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:}
 
 app:
   jwt:
@@ -24,3 +24,9 @@ ckd-prediction:
   tabular-url: ${CKD_TABULAR_PREDICTION_URL:http://localhost:8001/routes/tab_predict}
   image-url: ${CKD_IMAGE_PREDICTION_URL:http://localhost:8001/routes/unet_predict}
 
+
+ckd:
+  security:
+    auth-service: true
+    login-limit: ${LOGIN_RATE_LIMIT:5}
+    login-window-seconds: ${LOGIN_RATE_WINDOW_SECONDS:60}

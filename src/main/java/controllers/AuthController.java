@@ -4,7 +4,7 @@ import services.Authentication;
 import services.Authentication.AuthResult;
 import services.UserService;
 import services.UserService.UserResult;
-import jakarta.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,10 +88,9 @@ public class AuthController {
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, Object>> changePassword(
             @RequestBody Map<String, Object> body,
-            HttpServletRequest request
+            Principal principal
     ) {
-        String authenticatedEmail = (String) request.getAttribute(
-                JwtAuthenticationInterceptor.AUTHENTICATED_EMAIL_ATTRIBUTE);
+        String authenticatedEmail = principal.getName();
         return response(authentication.changePassword(body, authenticatedEmail));
     }
 

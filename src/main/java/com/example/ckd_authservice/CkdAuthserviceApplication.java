@@ -3,9 +3,10 @@ package com.example.ckd_authservice;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@org.springframework.context.annotation.Import(com.ckd.auth.SecurityAutoConfiguration.class)
 @SpringBootApplication(scanBasePackages = {
         "com.example.ckd_authservice",
-        "Controllers",
+        "controllers",
         "Database",
         "services"
 })

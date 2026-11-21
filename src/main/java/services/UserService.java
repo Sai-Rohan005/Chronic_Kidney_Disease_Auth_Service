@@ -1,6 +1,7 @@
 package services;
 
 import Database.UserRepository;
+import com.ckd.auth.CurrentCaller;
 import org.bson.Document;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class UserService {
 
     public UserResult getRole(String rawEmail) {
         String email = normalizeEmail(rawEmail);
+        CurrentCaller.requireSelf(email);
 //        if (!validEmail(email)) {
 //            return failure(400, "A valid email is required");
 //        }
@@ -41,6 +43,7 @@ public class UserService {
 
     public UserResult getUser(String rawEmail) {
         String email = normalizeEmail(rawEmail);
+        CurrentCaller.requireSelf(email);
 //        if (!validEmail(email)) {
 //            return failure(400, "A valid email is required");
 //        }
@@ -56,9 +59,14 @@ public class UserService {
 
 
     public UserResult getAllDoctors() {
+        CurrentCaller.user();
         List<Map<String, Object>> doctors = new ArrayList<>();
         for (Document doctor : userRepository.getDoctors()) {
-            doctors.add(safeUser(doctor));
+            Map<String, Object> entry = new LinkedHashMap<>();
+            for (String field : java.util.List.of("_id", "name", "email", "role", "specialization", "experienceYears", "rating", "availability")) {
+                if (doctor.containsKey(field)) entry.put(field, doctor.get(field));
+            }
+            doctors.add(entry);
         }
         return new UserResult(200, Map.of("doctors", doctors));
     }
